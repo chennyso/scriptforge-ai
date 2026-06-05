@@ -19,7 +19,7 @@ ScriptForge AI 是一款面向小说作者的 AI 剧本改编工具，通过“�
 - Backend：FastAPI、Pydantic、PyYAML、jsonschema、httpx
 - AI：MiMo OpenAI-compatible Chat Completions API
 
-MiMo API 配置参考官方接口：`https://api.mimo-v2.com/v1/chat/completions`，模型默认 `mimo-v2.5-pro`。
+MiMo OpenAI 兼容 Base URL：`https://token-plan-cn.xiaomimimo.com/v1`，模型默认 `mimo-v2.5-pro`。
 
 ## 本地运行
 
@@ -54,12 +54,14 @@ http://127.0.0.1:5173
 
 ```env
 MIMO_API_KEY=你的密钥
-MIMO_BASE_URL=https://api.mimo-v2.com/v1
+MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
 MIMO_MODEL=mimo-v2.5-pro
 USE_MOCK_AI=false
 ```
 
 `.env` 已加入 `.gitignore`，不要提交真实密钥。
+
+注意：如果你的 Key 页面标注“仅限 AI 编程和智能体工具中交互式使用，不可用于自动化脚本或应用后端”，不要把它作为线上作品后端密钥长期调用。比赛 Demo 可以先使用本地规则引擎兜底，正式接入时应更换允许后端应用调用的服务端 API Key。
 
 可用下面的接口确认后端是否读取到配置，返回结果不会暴露密钥：
 
@@ -67,7 +69,7 @@ USE_MOCK_AI=false
 http://127.0.0.1:8000/api/config
 ```
 
-如果当前网络无法访问 `api.mimo-v2.com`，生成接口会自动回退到本地规则引擎，并在前端显示 provider 说明，保证 Demo 和基础改编流程仍可运行。
+如果当前网络无法访问 MiMo Base URL，生成接口会自动回退到本地规则引擎，并在前端显示 provider 说明，保证 Demo 和基础改编流程仍可运行。
 
 ## 示例数据
 
