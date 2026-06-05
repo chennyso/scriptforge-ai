@@ -4,10 +4,12 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
+ROOT = Path(__file__).resolve().parents[2]
+
 
 def test_generate_route_with_public_domain_sample():
     client = TestClient(app)
-    text = Path("../examples/public-domain-novel.md").read_text(encoding="utf-8")
+    text = (ROOT / "examples" / "public-domain-novel.md").read_text(encoding="utf-8")
     response = client.post(
         "/api/generate",
         json={

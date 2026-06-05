@@ -19,9 +19,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run backend tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend
         run: |
           cd backend
-          pytest
+          python -m pytest -vv
 
   frontend:
     runs-on: ubuntu-latest
@@ -40,4 +42,3 @@ jobs:
         run: |
           cd frontend
           npm run build
-
