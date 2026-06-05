@@ -6,11 +6,56 @@ from app.models import AdaptationSettings, Chapter
 
 
 COMMON_LOCATIONS = ["客栈", "庭院", "书房", "街", "城", "门", "屋", "桥", "车站", "大厅", "森林", "河岸", "office", "room"]
+CHINESE_SURNAMES = (
+    "赵钱孙李周吴郑王冯陈褚卫蒋沈韩杨朱秦尤许何吕施张孔曹严华金魏陶姜"
+    "戚谢邹喻柏水窦章云苏潘葛奚范彭郎鲁韦昌马苗凤花方俞任袁柳鲍史唐"
+    "费廉岑薛雷贺倪汤滕殷罗毕郝邬安常乐于时傅皮卞齐康伍余元卜顾孟"
+    "平黄和穆萧尹姚邵湛汪祁毛禹狄米贝明臧计伏成戴宋庞熊纪舒屈项祝"
+    "董梁杜阮蓝闵席季麻强贾路娄危江童颜郭梅盛林刁钟徐邱骆高夏蔡田"
+)
+TRANSLITERATION_CHARS = "阿埃艾爱奥巴贝布查达德迪蒂法菲弗格哈赫霍基吉杰卡凯克拉勒雷里利罗洛鲁马梅蒙米姆娜妮尼诺帕佩普奇齐乔切萨瑟森斯泰特提托瓦维威温沃乌西希夏亚耶伊约尤扎泽兹"
+NAME_STOPWORDS = {"他们", "她们", "我们", "你们", "这个", "那个", "时候", "声音", "眼前", "已经", "没有", "自己", "一句", "雨从", "傍晚", "深夜", "旧书", "书房"}
+BAD_NAME_PARTS = {
+    "任何",
+    "办公室",
+    "只有",
+    "这封",
+    "不能",
+    "打开",
+    "门外",
+    "年轻",
+    "贫穷",
+    "节日",
+    "希望",
+    "有一天",
+    "空荡",
+    "账本",
+    "钱箱",
+    "钥匙",
+    "灵体",
+    "画面",
+    "音乐",
+    "烛光",
+    "孩子",
+    "餐桌",
+    "墓碑",
+    "明晚",
+    "鲁奇冷",
+    "成了",
+    "安慰",
+    "方传来",
+    "顾财富",
+    "祝福",
+    "少年",
+    "时代",
+    "站在",
+}
 
 
 def build_blueprint(chapters: list[Chapter]) -> dict[str, Any]:
-    names = _extract_names("".join(chapter.content for chapter in chapters))
-    locations = _extract_locations("".join(chapter.content for chapter in chapters))
+    joined = "".join(chapter.content for chapter in chapters)
+    names = _extract_names(joined)
+    locations = _extract_locations(joined)
     return {
         "theme": "人物在外部压力下做出选择，并推动关系与目标发生变化。",
         "characters": names,
@@ -31,13 +76,7 @@ def generate_rule_script(chapters: list[Chapter], settings: AdaptationSettings) 
     blueprint = build_blueprint(chapters)
     character_names = blueprint["characters"] or ["林知远", "沈清", "周启"]
     characters = [
-        {
-            "id": f"char_{idx + 1}",
-            "name": name,
-            "role": role,
-            "motivation": motivation,
-            "voice": voice,
-        }
+        {"id": f"char_{idx + 1}", "name": name, "role": role, "motivation": motivation, "voice": voice}
         for idx, (name, role, motivation, voice) in enumerate(_character_profiles(character_names))
     ]
     locations = [
@@ -52,19 +91,14 @@ def generate_rule_script(chapters: list[Chapter], settings: AdaptationSettings) 
         main = characters[idx % len(characters)]
         partner = characters[(idx + 1) % len(characters)]
         location = locations[idx % len(locations)]
-        source_summary = _summary(chapter.content)
         beats = [
             {"type": "action", "content": f"{location['name']}里，{main['name']}带着上一场留下的问题进入新的局面。"},
             {
                 "type": "dialogue",
                 "speaker": main["id"],
-                "content": _dialogue_line(main["name"], source_summary, settings.style),
+                "content": _dialogue_line(main["name"], _summary(chapter.content), settings.style),
             },
-            {
-                "type": "dialogue",
-                "speaker": partner["id"],
-                "content": _reply_line(partner["name"], settings.dialogue_density),
-            },
+            {"type": "dialogue", "speaker": partner["id"], "content": _reply_line(partner["name"], settings.dialogue_density)},
             {"type": "action", "content": _turning_point(chapter.content)},
         ]
         if settings.narration_level != "none":
@@ -119,15 +153,71 @@ def apply_rule_rewrite(script: dict[str, Any], scene_id: str, instruction: str) 
 
 
 def _extract_names(text: str) -> list[str]:
-    candidates = re.findall(r"[\u4e00-\u9fff]{2,4}", text)
-    stop = {"他们", "她们", "我们", "你们", "这个", "那个", "时候", "声音", "眼前", "已经", "没有", "自己", "一句"}
-    names = [item for item in candidates if item not in stop and len(set(item)) > 1]
-    chinese_names = [name for name, _ in Counter(names).most_common(4)]
+    chinese_names = _extract_chinese_names(text)
     english_candidates = re.findall(r"\b[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})?\b", text)
     english_stop = {"Chapter", "Project Gutenberg", "Alice Adventures", "Wonderland", "Illustration"}
     english_names = [name for name, _ in Counter(english_candidates).most_common(8) if name not in english_stop]
     merged = chinese_names + [name for name in english_names if name not in chinese_names]
     return merged[:4]
+
+
+def _extract_chinese_names(text: str) -> list[str]:
+    transliteration_pattern = (
+        f"([{TRANSLITERATION_CHARS}]{{2,5}})"
+        r"(?=(?:的|说|问|看见|听见|发现|回到|站在|走进|拒绝|拦住|追来|逼|承认|推开|告诉|终于|在|，|。|、))"
+    )
+    surname_context_pattern = (
+        f"([{CHINESE_SURNAMES}][\u4e00-\u9fff]{{1,2}})"
+        r"(?=(?:说|问|看见|听见|发现|回到|站在|走进|拒绝|拦住|追来|逼|承认|推开|告诉|终于|的|在|，|。|、))"
+    )
+    context_pattern = r"([\u4e00-\u9fff]{2,5})(?=(?:的|说|问|看见|听见|发现|回到|站在|走进|拒绝|拦住|追来|逼|承认|推开|告诉|终于))"
+    candidates = [_trim_name(match.group(1)) for match in re.finditer(transliteration_pattern, text)]
+    candidates.extend(_trim_name(match.group(1)) for match in re.finditer(surname_context_pattern, text))
+    candidates.extend(_trim_name(match.group(1)) for match in re.finditer(context_pattern, text))
+    raw_valid = [name for name in candidates if _valid_chinese_name(name)]
+    counts = Counter(raw_valid)
+    repeated = [name for name, count in counts.most_common(12) if count >= 2]
+    if len(repeated) >= 3:
+        valid = _dedupe_name_candidates(repeated)
+    else:
+        valid = _dedupe_name_candidates(raw_valid)
+
+    ordered: list[str] = []
+    for name, _ in Counter(valid).most_common(12):
+        if name not in ordered:
+            ordered.append(name)
+    return ordered[:4]
+
+
+def _trim_name(name: str) -> str:
+    clean = name
+    while len(clean) > 2 and clean[-1] in "回到在说问看听追逼把将和与的了站拦承冷共成过曾":
+        clean = clean[:-1]
+    return clean
+
+
+def _valid_chinese_name(name: str) -> bool:
+    if not 2 <= len(name) <= 4:
+        return False
+    if name in NAME_STOPWORDS or len(set(name)) == 1:
+        return False
+    if name[0] in "的地得看听说问追逼拦站":
+        return False
+    if any(part in name for part in BAD_NAME_PARTS):
+        return False
+    if name[-1] in "上下里外前后中内边旁夜天雨雾门街房信章他她它":
+        return False
+    return True
+
+
+def _dedupe_name_candidates(names: list[str]) -> list[str]:
+    unique = list(dict.fromkeys(names))
+    result = []
+    for name in unique:
+        if any(name != other and name in other for other in unique):
+            continue
+        result.append(name)
+    return result
 
 
 def _extract_locations(text: str) -> list[str]:

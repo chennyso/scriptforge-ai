@@ -117,6 +117,10 @@ export function App() {
   }
 
   const scenes = result?.script?.episodes?.flatMap((episode: any) => episode.scenes) || [];
+  const characterNames = useMemo(() => {
+    const pairs = result?.script?.characters?.map((character: any) => [character.id, character.name]) || [];
+    return Object.fromEntries(pairs);
+  }, [result]);
 
   return (
     <main className="app-shell">
@@ -181,7 +185,7 @@ export function App() {
                   <article className={selectedScene === scene.id ? "scene selected" : "scene"} key={scene.id} onClick={() => setSelectedScene(scene.id)}>
                     <div><strong>{scene.id}</strong><span>{scene.heading}</span></div>
                     <p>{scene.objective}</p>
-                    {scene.beats.slice(0, 4).map((beat: any, idx: number) => <small key={idx}>{beat.speaker ? `${beat.speaker}: ` : ""}{beat.content}</small>)}
+                    {scene.beats.slice(0, 4).map((beat: any, idx: number) => <small key={idx}>{beat.speaker ? `${characterNames[beat.speaker] || beat.speaker}: ` : ""}{beat.content}</small>)}
                   </article>
                 ))}
               </div>
