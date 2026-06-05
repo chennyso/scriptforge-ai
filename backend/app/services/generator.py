@@ -10,6 +10,7 @@ from app.services.validator import dump_yaml, load_yaml, validate_script_yaml
 async def generate_script(chapters: list[Chapter], settings: AdaptationSettings) -> GenerateResponse:
     client = AiClient()
     provider = "rule-engine"
+    provider_note = "未配置模型或已启用 USE_MOCK_AI，使用本地规则引擎生成。"
     script: dict[str, Any]
 
     if client.enabled:
@@ -19,9 +20,12 @@ async def generate_script(chapters: list[Chapter], settings: AdaptationSettings)
             validation = validate_script_yaml(script)
             if validation.valid:
                 provider = client.model
+                provider_note = "MiMo 模型生成并通过 Schema 校验。"
             else:
+                provider_note = "MiMo 返回内容未通过 Schema 校验，已自动回退到规则引擎。"
                 script = generate_rule_script(chapters, settings)
-        except Exception:
+        except Exception as exc:
+            provider_note = f"MiMo 调用失败，已自动回退到规则引擎：{type(exc).__name__}"
             script = generate_rule_script(chapters, settings)
     else:
         script = generate_rule_script(chapters, settings)
@@ -35,6 +39,7 @@ async def generate_script(chapters: list[Chapter], settings: AdaptationSettings)
         script=script,
         validation=validation,
         provider=provider,
+        provider_note=provider_note,
     )
 
 
@@ -74,4 +79,3 @@ def _strip_fences(text: str) -> str:
         if clean.lower().startswith("yaml"):
             clean = clean[4:]
     return clean.strip()
-

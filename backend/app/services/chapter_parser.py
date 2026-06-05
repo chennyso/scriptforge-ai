@@ -2,7 +2,10 @@ import re
 
 from app.models import Chapter
 
-TITLE_RE = re.compile(r"(?m)^\s*((第[一二三四五六七八九十百千万\d]+[章节回幕].*)|(Chapter\s+\d+.*)|(\d+[\.、]\s*.+))\s*$", re.I)
+TITLE_RE = re.compile(
+    r"(?m)^\s*((第[一二三四五六七八九十百千万\d]+[章节回幕].*)|(Chapter\s+[\divxlcdm]+\.?.*)|(CHAPTER\s+[\divxlcdm]+\.?.*)|(\d+[\.、]\s*.+))\s*$",
+    re.I,
+)
 
 
 def parse_chapters(text: str) -> list[Chapter]:
@@ -31,4 +34,3 @@ def parse_chapters(text: str) -> list[Chapter]:
 
 def _chapter(index: int, title: str, content: str) -> Chapter:
     return Chapter(index=index, title=title, content=content, word_count=len(re.findall(r"\w+|[\u4e00-\u9fff]", content)))
-

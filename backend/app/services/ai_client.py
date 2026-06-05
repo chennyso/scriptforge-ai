@@ -1,10 +1,11 @@
 import os
+from pathlib import Path
 from typing import Any
 
 import httpx
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 
 class AiClient:
@@ -38,4 +39,3 @@ class AiClient:
             response.raise_for_status()
             data = response.json()
             return data["choices"][0]["message"]["content"]
-

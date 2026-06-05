@@ -50,6 +50,7 @@ class GenerateResponse(BaseModel):
     script: dict[str, Any]
     validation: ValidationResult
     provider: str
+    provider_note: str = ""
 
 
 class ValidateRequest(BaseModel):
@@ -60,4 +61,3 @@ class RewriteRequest(BaseModel):
     yaml_text: str
     scene_id: str
     instruction: Literal["intensify_conflict", "add_dialogue", "compress_pace", "more_cinematic"]
-

@@ -16,3 +16,21 @@ def test_parse_chinese_chapters():
     assert len(chapters) == 3
     assert chapters[0].title.startswith("第1章")
 
+
+def test_parse_english_roman_chapters():
+    text = """
+CHAPTER I.
+Down the Rabbit-Hole
+Alice was beginning to get very tired of sitting by her sister.
+
+CHAPTER II.
+The Pool of Tears
+Alice grew and shrank and wondered what would happen next.
+
+CHAPTER III.
+A Caucus-Race and a Long Tale
+Everyone spoke at once, and Alice tried to understand the rules.
+"""
+    chapters = parse_chapters(text)
+    assert len(chapters) == 3
+    assert chapters[0].title == "CHAPTER I."

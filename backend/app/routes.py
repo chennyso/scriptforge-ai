@@ -1,11 +1,16 @@
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
 
 from app.models import GenerateRequest, ParseRequest, RewriteRequest, ValidateRequest
 from app.services.chapter_parser import parse_chapters
 from app.services.generator import generate_script, rewrite_scene
 from app.services.validator import load_yaml, validate_script_yaml
+from app.services.ai_client import AiClient
 
 router = APIRouter()
+ROOT = Path(__file__).resolve().parents[2]
+EXAMPLES_DIR = ROOT / "examples"
 
 
 @router.post("/parse")
@@ -35,3 +40,46 @@ def validate(payload: ValidateRequest):
 @router.post("/rewrite")
 async def rewrite(payload: RewriteRequest):
     return await rewrite_scene(payload.yaml_text, payload.scene_id, payload.instruction)
+
+
+@router.get("/samples")
+def samples():
+    return [
+        {
+            "id": "christmas-carol",
+            "title": "A Christmas Carol 中文改写样例",
+            "path": "public-domain-novel.md",
+            "source": "Charles Dickens, public domain",
+        },
+        {
+            "id": "alice-wonderland",
+            "title": "Alice's Adventures in Wonderland 长篇英文样例",
+            "path": "alice-wonderland-gutenberg.txt",
+            "source": "Project Gutenberg ebook #11, public domain in the United States",
+        },
+    ]
+
+
+@router.get("/samples/{sample_id}")
+def sample_text(sample_id: str):
+    mapping = {
+        "christmas-carol": "public-domain-novel.md",
+        "alice-wonderland": "alice-wonderland-gutenberg.txt",
+    }
+    filename = mapping.get(sample_id)
+    if not filename:
+        raise HTTPException(status_code=404, detail="样例不存在。")
+    path = EXAMPLES_DIR / filename
+    return {"id": sample_id, "text": path.read_text(encoding="utf-8")}
+
+
+@router.get("/config")
+def config():
+    client = AiClient()
+    return {
+        "model": client.model,
+        "base_url": client.base_url,
+        "ai_enabled": client.enabled,
+        "api_key_configured": bool(client.api_key),
+        "mock_mode": client.use_mock,
+    }

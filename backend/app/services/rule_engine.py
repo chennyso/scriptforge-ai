@@ -122,7 +122,12 @@ def _extract_names(text: str) -> list[str]:
     candidates = re.findall(r"[\u4e00-\u9fff]{2,4}", text)
     stop = {"他们", "她们", "我们", "你们", "这个", "那个", "时候", "声音", "眼前", "已经", "没有", "自己", "一句"}
     names = [item for item in candidates if item not in stop and len(set(item)) > 1]
-    return [name for name, _ in Counter(names).most_common(4)]
+    chinese_names = [name for name, _ in Counter(names).most_common(4)]
+    english_candidates = re.findall(r"\b[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})?\b", text)
+    english_stop = {"Chapter", "Project Gutenberg", "Alice Adventures", "Wonderland", "Illustration"}
+    english_names = [name for name, _ in Counter(english_candidates).most_common(8) if name not in english_stop]
+    merged = chinese_names + [name for name in english_names if name not in chinese_names]
+    return merged[:4]
 
 
 def _extract_locations(text: str) -> list[str]:
@@ -163,4 +168,3 @@ def _reply_line(name: str, density: str) -> str:
     if density == "high":
         return f"{name}：我不是不说，是说出来以后，我们都没有退路。"
     return f"{name}：你确定自己承受得住吗？"
-

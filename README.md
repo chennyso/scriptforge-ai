@@ -61,9 +61,18 @@ USE_MOCK_AI=false
 
 `.env` 已加入 `.gitignore`，不要提交真实密钥。
 
+可用下面的接口确认后端是否读取到配置，返回结果不会暴露密钥：
+
+```text
+http://127.0.0.1:8000/api/config
+```
+
+如果当前网络无法访问 `api.mimo-v2.com`，生成接口会自动回退到本地规则引擎，并在前端显示 provider 说明，保证 Demo 和基础改编流程仍可运行。
+
 ## 示例数据
 
 - `examples/public-domain-novel.md`：基于公共领域作品《A Christmas Carol》的中文改写测试文本。
+- `examples/alice-wonderland-gutenberg.txt`：Project Gutenberg ebook #11，公共领域长篇英文小说样例，用于测试长文本章节解析和真实输入规模。
 - `examples/sample-output.yaml`：Schema 输出样例。
 
 ## Schema 文档

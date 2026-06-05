@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Download, FileCheck2, Loader2, PenLine, RefreshCw, Sparkles, Upload } from "lucide-react";
+import { BookOpen, Download, FileCheck2, Loader2, PenLine, RefreshCw, Sparkles, Upload } from "lucide-react";
 import { postJson, Settings } from "./lib/api";
 
 const sampleText = `第1章 雨夜来信
@@ -18,6 +18,7 @@ type GenerateResult = {
   script: any;
   validation: { valid: boolean; issues: Array<{ path: string; message: string }> };
   provider: string;
+  provider_note: string;
 };
 
 const defaultSettings: Settings = {
@@ -39,9 +40,23 @@ export function App() {
 
   const stats = useMemo(() => {
     const chars = text.trim().length;
-    const chapters = (text.match(/^\s*(第[一二三四五六七八九十百千万\d]+[章节回幕]|Chapter\s+\d+)/gim) || []).length;
+    const chapters = (text.match(/^\s*(第[一二三四五六七八九十百千万\d]+[章节回幕]|Chapter\s+[\divxlcdm]+\.?)/gim) || []).length;
     return { chars, chapters };
   }, [text]);
+
+  async function loadLongSample() {
+    setLoading(true);
+    setNotice("");
+    try {
+      const data = await fetch("/api/samples/alice-wonderland").then((response) => response.json());
+      setText(data.text);
+      setNotice("已载入公共领域长篇样例 Alice's Adventures in Wonderland。");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "载入样例失败");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function generate() {
     setLoading(true);
@@ -121,10 +136,13 @@ export function App() {
         <aside className="panel input-panel">
           <div className="panel-head">
             <h2>小说输入</h2>
-            <label className="icon-button">
-              <Upload size={18} />
-              <input type="file" accept=".txt,.md" onChange={(event) => onFile(event.target.files?.[0])} />
-            </label>
+            <div className="toolbar">
+              <button title="载入公共领域长篇样例" onClick={loadLongSample}><BookOpen size={18} /></button>
+              <label className="icon-button" title="上传 txt/md 文件">
+                <Upload size={18} />
+                <input type="file" accept=".txt,.md" onChange={(event) => onFile(event.target.files?.[0])} />
+              </label>
+            </div>
           </div>
           <textarea value={text} onChange={(event) => setText(event.target.value)} />
 
@@ -152,6 +170,7 @@ export function App() {
               <div className={result.validation.valid ? "validation valid" : "validation invalid"}>
                 {result.validation.valid ? "Schema 校验通过" : `${result.validation.issues.length} 个结构问题`}
               </div>
+              <div className="provider-note">{result.provider} · {result.provider_note}</div>
               <div className="blueprint">
                 <h3>故事蓝图</h3>
                 <p>{result.blueprint.theme}</p>
