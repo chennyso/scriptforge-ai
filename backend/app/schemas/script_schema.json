@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScriptForge Structured Screenplay",
+  "type": "object",
+  "required": ["metadata", "characters", "locations", "episodes", "adaptation_notes"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["title", "script_type", "language", "source_chapters", "logline"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "script_type": { "type": "string" },
+        "language": { "type": "string" },
+        "source_chapters": { "type": "integer", "minimum": 3 },
+        "logline": { "type": "string", "minLength": 5 }
+      },
+      "additionalProperties": true
+    },
+    "characters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "role", "motivation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
+          "name": { "type": "string" },
+          "role": { "type": "string" },
+          "motivation": { "type": "string" },
+          "voice": { "type": "string" }
+        }
+      }
+    },
+    "locations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "description"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
+          "name": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "episodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "scenes"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "scenes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "heading", "time", "location", "characters", "source_chapters", "objective", "beats"],
+              "properties": {
+                "id": { "type": "string" },
+                "heading": { "type": "string" },
+                "time": { "type": "string" },
+                "location": { "type": "string" },
+                "characters": { "type": "array", "items": { "type": "string" } },
+                "source_chapters": { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
+                "objective": { "type": "string" },
+                "conflict": { "type": "string" },
+                "beats": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": ["type", "content"],
+                    "properties": {
+                      "type": { "enum": ["action", "dialogue", "narration", "transition"] },
+                      "speaker": { "type": "string" },
+                      "content": { "type": "string", "minLength": 1 },
+                      "parenthetical": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "adaptation_notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+metadata:
+  title: 圣诞颂歌改编样例
+  script_type: screenplay
+  language: zh-CN
+  source_chapters: 5
+  logline: 冷漠的商人在三次灵体来访中重新理解亲情、怜悯与选择的重量。
+characters:
+  - id: scrooge
+    name: 斯克鲁奇
+    role: 主角
+    motivation: 害怕失去控制，因此用金钱和冷漠保护自己
+    voice: 尖刻、克制、逐渐松动
+locations:
+  - id: office
+    name: 账房办公室
+    description: 冷雾、账本和微弱火光构成主角封闭内心的外化空间。
+episodes:
+  - id: EP01
+    title: 第一集：锁链与炉火
+    scenes:
+      - id: SC001
+        heading: 内景 - 账房办公室 - 夜
+        time: 夜
+        location: office
+        characters: [scrooge]
+        source_chapters: [1]
+        objective: 斯克鲁奇拒绝节日邀请，维持自己冷硬的秩序。
+        conflict: 外甥的热情与斯克鲁奇的自我封闭正面碰撞。
+        beats:
+          - type: action
+            content: 雾从窗缝里挤进来，斯克鲁奇把账簿推到火光旁。
+          - type: dialogue
+            speaker: scrooge
+            content: 节日不会让欠款少一便士。
+          - type: transition
+            content: 切至门铃响起。
+adaptation_notes:
+  - 示例展示 Schema 字段，不代表完整剧本长度。
+
