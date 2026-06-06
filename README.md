@@ -75,6 +75,8 @@ http://127.0.0.1:8000/api/config
 
 - `examples/public-domain-novel.md`：基于公共领域作品《A Christmas Carol》的中文改写测试文本。
 - `examples/alice-wonderland-gutenberg.txt`：Project Gutenberg ebook #11，公共领域长篇英文小说样例，用于测试长文本章节解析和真实输入规模。
+- `examples/journey-to-the-west-gutenberg.txt`：Project Gutenberg ebook #23962，《西游记》中文公版长篇样例，用于测试中文长文本章节解析。
+- `examples/guofeng-webnovel-sample.md`：来自 `longyuewangdcu/GuoFeng-Webnovel` 仓库的 WMT2024 公开中文网文测试集片段，用于测试现代网文章节风格。
 - `examples/sample-output.yaml`：Schema 输出样例。
 
 ## Schema 文档

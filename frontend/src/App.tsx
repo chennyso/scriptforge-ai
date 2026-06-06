@@ -48,9 +48,9 @@ export function App() {
     setLoading(true);
     setNotice("");
     try {
-      const data = await fetch("/api/samples/alice-wonderland").then((response) => response.json());
+      const data = await fetch("/api/samples/guofeng-webnovel").then((response) => response.json());
       setText(data.text);
-      setNotice("已载入公共领域长篇样例 Alice's Adventures in Wonderland。");
+      setNotice("已载入 GuoFeng 公开网文测试集中文长篇样例。");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "载入样例失败");
     } finally {
@@ -141,7 +141,7 @@ export function App() {
           <div className="panel-head">
             <h2>小说输入</h2>
             <div className="toolbar">
-              <button title="载入公共领域长篇样例" onClick={loadLongSample}><BookOpen size={18} /></button>
+              <button title="载入公开网文测试集中文长篇样例" onClick={loadLongSample}><BookOpen size={18} /></button>
               <label className="icon-button" title="上传 txt/md 文件">
                 <Upload size={18} />
                 <input type="file" accept=".txt,.md" onChange={(event) => onFile(event.target.files?.[0])} />

@@ -57,6 +57,18 @@ def samples():
             "path": "alice-wonderland-gutenberg.txt",
             "source": "Project Gutenberg ebook #11, public domain in the United States",
         },
+        {
+            "id": "journey-west",
+            "title": "《西游记》中文长篇样例",
+            "path": "journey-to-the-west-gutenberg.txt",
+            "source": "Project Gutenberg ebook #23962, public domain in the United States",
+        },
+        {
+            "id": "guofeng-webnovel",
+            "title": "GuoFeng 公开网文测试集样例",
+            "path": "guofeng-webnovel-sample.md",
+            "source": "longyuewangdcu/GuoFeng-Webnovel WMT2024_Testset",
+        },
     ]
 
 
@@ -65,6 +77,8 @@ def sample_text(sample_id: str):
     mapping = {
         "christmas-carol": "public-domain-novel.md",
         "alice-wonderland": "alice-wonderland-gutenberg.txt",
+        "journey-west": "journey-to-the-west-gutenberg.txt",
+        "guofeng-webnovel": "guofeng-webnovel-sample.md",
     }
     filename = mapping.get(sample_id)
     if not filename:
